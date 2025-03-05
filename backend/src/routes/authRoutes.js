@@ -1,24 +1,9 @@
 const express = require("express");
-const router = express.Router();
+    const { login } = require("../controllers/authController");
 
-//Mock user data (we'll replace this with a database later")
-const users = [
-    {id: 1, email: "admin@example.com", password: "password123" },
-];
+    const router = express.Router();
 
-// Login Route
-router.post("/login", (req, res) => {
-    const { email, password } = req.body;
+    //Login route
+    router.post("/login", login);
 
-    const user = users.find(
-        (u) => u.email === email && u.password === password
-    );
-
-    if (user) {
-        res.json({ message: "Login successful", user });
-    } else {
-        res.status(401).json({ message: "Invalid email or password" });
-    }
-});
-
-module.exports = router;
+    module.exports = router;
