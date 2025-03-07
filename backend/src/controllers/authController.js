@@ -1,24 +1,49 @@
 const { connect } = require("../config/db");
-    const User = require("../models/userModel");
+const User = require("../models/userModel");
+const bcrypt = require("bcryptjs");
 
-    async function login(req, res) {
-        const { email, password } = req.body;
+async function register(req, res) {
+  const { email, password } = req.body;
 
-        try {
-            const db = await connect();
-            const userModel = new User(db);
+  try {
+    const db = await connect();
+    const userModel = new User(db);
 
-            const user = await userModel.findUserByEmail(email);
-
-            if (user && user.password === password) {
-                res.json({ message: "Login successful", user });
-            } else {
-                res.status(401).json({ message: "Invalid email or password"});
-            }
-        } catch (err) {
-            console.error("Error during login:", err);
-            res.status(500).json({ message: "Internal server error" });
-        }
+    // Check if the user already exists
+    const existingUser = await userModel.findUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    module.exports = { login };
+    // Create a new user
+    await userModel.createUser({ email, password });
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    console.error("Error during registration:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+async function login(req, res) {
+  const { email, password } = req.body;
+
+  try {
+    const db = await connect();
+    const userModel = new User(db);
+
+    // Find user by email
+    const user = await userModel.findUserByEmail(email);
+
+    // Check if the user exists and the password is correct
+    if (user && (await bcrypt.compare(password, user.password))) {
+      res.json({ message: "Login successful", user });
+    } else {
+      res.status(401).json({ message: "Invalid email or password" });
+    }
+  } catch (err) {
+    console.error("Error during login:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+module.exports = { register, login };

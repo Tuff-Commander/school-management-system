@@ -1,4 +1,5 @@
 const { ObjectId } = require("mongodb");
+const bcrypt = require("bcryptjs");
 
     class User {
         constructor(db) {
@@ -6,7 +7,12 @@ const { ObjectId } = require("mongodb");
         }
 
         async createUser(user) {
-            const result = await this.collection.insertOne(user);
+            //Hash the password before saving
+            const hashedPassword = await bcrypt.hash(user.password, 10);
+            const result = await this.collection.insertOne({
+                ...user,
+                password: hashedPassword,
+            });
             return result.insertedId;
         }
 
