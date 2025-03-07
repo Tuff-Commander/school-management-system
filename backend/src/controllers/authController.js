@@ -1,8 +1,15 @@
 const { connect } = require("../config/db");
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
+const { validationResult } = require("express-validator");
 
 async function register(req, res) {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { email, password } = req.body;
 
   try {
@@ -25,6 +32,12 @@ async function register(req, res) {
 }
 
 async function login(req, res) {
+  // Check for validation  errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { email, password } = req.body;
 
   try {
