@@ -6,6 +6,8 @@ const { validationResult } = require("express-validator");
 async function register(req, res) {
   // Check for validation errors
   const errors = validationResult(req);
+  const hashedPassword = await bcrypt.hash(password, 10);
+await userModel.createUser({ email, password: hashedPassword });
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
